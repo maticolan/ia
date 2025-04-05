@@ -15,15 +15,17 @@
 using namespace std;
 
 // ==================== DEFINICIONES ====================
-const int GRAFO_SIZE = 200;           // Dimensiones lógicas del grafo
+const int GRAFO_WIDTH = 400;  // 40 * STEP
+const int GRAFO_HEIGHT = 200; // 20 * STEP
+
 const int STEP = 10;                  // Distancia entre nodos lógicos
 const float PERCENT_DELETED = 0.2f;
 const int INF = INT_MAX;
 const int WINDOW_WIDTH = 600;         // Tamaño de la ventana
 const int WINDOW_HEIGHT = 600;
 
-const float SCALE_X = (float)WINDOW_WIDTH / GRAFO_SIZE;
-const float SCALE_Y = (float)WINDOW_HEIGHT / GRAFO_SIZE;
+const float SCALE_X = (float)WINDOW_WIDTH / GRAFO_WIDTH;
+const float SCALE_Y = (float)WINDOW_HEIGHT / GRAFO_HEIGHT;
 
 // ==================== ESTRUCTURAS ====================
 struct Punto {
@@ -43,20 +45,20 @@ struct Grafo {
     vector<vector<Punto>> puntos;
     vector<vector<bool>> visitados;
 
-    Grafo(int size) {
-        int gridSize = size / STEP;
-        puntos.resize(gridSize, vector<Punto>(gridSize));
-        visitados.resize(gridSize, vector<bool>(gridSize, false));
+    Grafo(int width, int height) {
+        int cols = width / STEP;
+        int rows = height / STEP;
+        puntos.resize(cols, vector<Punto>(rows));
+        visitados.resize(cols, vector<bool>(rows, false));
     }
 };
 
 // ==================== VARIABLES GLOBALES ====================
-Grafo grafo(GRAFO_SIZE);
+Grafo grafo(GRAFO_WIDTH, GRAFO_HEIGHT);
 int startX = 0, startY = 0;
-int targetX = (GRAFO_SIZE / STEP) - 1, targetY = (GRAFO_SIZE / STEP) - 1;
+int targetX = (GRAFO_WIDTH / STEP) - 1, targetY = (GRAFO_HEIGHT / STEP) - 1;
 int dx[] = {1, -1, 0, 0, -1, 1, -1, 1};
 int dy[] = {0, 0, 1, -1, 1, 1, -1, -1};
-
 vector<pair<int, int>> caminosExplorados;
 vector<pair<int, int>> caminoMasCorto;
 
@@ -108,7 +110,7 @@ void AEstrella(Grafo& g, int sx, int sy, int tx, int ty) {
     resetVisitados(g);
     priority_queue<Nodo> pq;
     map<pair<int, int>, pair<int, int>> padre;
-    vector<vector<int>> costo(GRAFO_SIZE / STEP, vector<int>(GRAFO_SIZE / STEP, INF));
+    vector<vector<int>> costo(GRAFO_WIDTH / STEP, vector<int>(GRAFO_HEIGHT / STEP, INF));
 
     pq.push({sx, sy, 0});
     costo[sx][sy] = 0;
@@ -234,7 +236,7 @@ void HillClimbing(Grafo& g, int sx, int sy, int tx, int ty) {
 
 // ==================== GRAFICADO ====================
 void drawGraph(Grafo& g) {
-    int gridSize = GRAFO_SIZE / STEP;
+    int gridSize =400 / STEP;
     for (int i = 0; i < gridSize; i++) {
         for (int j = 0; j < gridSize; j++) {
             Punto& p = g.puntos[i][j];
@@ -275,8 +277,8 @@ void keyboard(unsigned char key, int, int) {
 
 void mouse(int button, int state, int x, int y) {
     if (state != GLUT_DOWN) return;
-    int gx = x / (WINDOW_WIDTH / (GRAFO_SIZE / STEP));
-    int gy = (WINDOW_HEIGHT - y) / (WINDOW_HEIGHT / (GRAFO_SIZE / STEP));
+    int gx = x / (WINDOW_WIDTH / (GRAFO_WIDTH / STEP));
+    int gy = (WINDOW_HEIGHT - y) / (WINDOW_HEIGHT / (GRAFO_HEIGHT / STEP));
 
     if (gx >= 0 && gy >= 0 && gx < grafo.puntos.size() && gy < grafo.puntos[0].size() && !grafo.puntos[gx][gy].deleted) {
         if (button == GLUT_LEFT_BUTTON) {
@@ -293,9 +295,10 @@ void mouse(int button, int state, int x, int y) {
 
 void initGraph(Grafo& g) {
     srand(time(NULL));
-    for (int i = 0; i < GRAFO_SIZE; i += STEP) {
-        for (int j = 0; j < GRAFO_SIZE; j += STEP) {
-            int xi = i / STEP, yj = j / STEP;
+   for (int i = 0; i < GRAFO_WIDTH; i += STEP){
+    for (int j = 0; j < GRAFO_HEIGHT; j += STEP){
+ 
+        int xi = i / STEP, yj = j / STEP;
             g.puntos[xi][yj].x = i;
             g.puntos[xi][yj].y = j;
             g.puntos[xi][yj].deleted = ((rand() / (float)RAND_MAX) < PERCENT_DELETED);
